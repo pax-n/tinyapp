@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
@@ -13,7 +12,7 @@ const urlDatabase = {
 };
 
 function generateRandomString() {
-  let newURL = Math.random().toString(36).substring(2,6);
+  let newURL = Math.random().toString(36).substr(2,6);
   return newURL;
 }
 
@@ -38,7 +37,7 @@ app.get("/urls.json", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send(`/urls/${randomKey}`);
+  res.redirect(`/urls/${randomKey}`);
   urlDatabase[randomKey] = req.body.longURL;         // Respond with 'Ok' (we will replace this)
 });
 
