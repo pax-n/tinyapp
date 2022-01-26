@@ -8,18 +8,20 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
       </div>
     </div>
-    <% if (!username) { %>
+    <% if (!user_id) { %>
       <form method="POST" class="form-inline" action="/login">
-        <input name="username" placeholder="Username" style="margin-right: 15px"/>
+        <input name="email" placeholder="Email" style="margin-right: 15px; border-radius: 5px;"/>
+        <input name="password" placeholder="password" style="margin-right: 15px; border-radius: 5px;"/>
         <button type="submit" class="btn btn-outline-dark">Login</button></form>
         <% }%>
-        <% if (username) { %>
+        <% if (user_id) { %>
         <p>
-          Hi, <%= username %>!
           <form method="POST" class="form-inline" action="/logout">
-            <button type="submit" class="btn btn-outline-dark">Logout</button></form>
+            <b style="font-size: 20px">Hi, <%= user_id %>!</b>
+            <button type="submit" class="btn btn-outline-dark" style="margin-left: 15px">Logout</button></form>
         </p>
         <% }%>
   </nav>
