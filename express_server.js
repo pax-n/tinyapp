@@ -15,10 +15,33 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 const generateRandomString = function() {
   let newURL = Math.random().toString(36).substr(2,6);
   return newURL;
 };
+
+//function that loops through the database and checks if the email is present
+const getUserByEmail = function(email, database){
+  for (let userID in database) {
+    if (email === database[userID].email) {
+      return database[userID];
+    }
+  }
+  return undefined;
+}
 
 const randomKey = generateRandomString();
 
@@ -100,9 +123,13 @@ app.get("/register", (req, res) => { //register page with two fields for email a
 });
 
 app.post("/register", (req, res) => {
+  const userChecker = getUserByEmail(req.body.email, users);
   if (!req.body.email || !req.body.password) {
     return res.status(400).send("Email and password cannot be blank.");
+  } else if (userChecker) {
+    return res.status(400).send("Email is already in use.");
   }
+
   const user_id = generateRandomString()
   users[user_id] = {
     id: user_id,
@@ -112,16 +139,3 @@ app.post("/register", (req, res) => {
   res.cookie("user", user_id)
   res.redirect("/urls");
 });  
-
-const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
-}
