@@ -27,14 +27,18 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls/new", (req, res) => { //page for creating a new TinyURL
+  const userID = req.cookies["user"]
+  const user = users[userID]
   const templateVars = {
-    user_id: req.cookies["user"],
+    user,
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls", (req, res) => { //page showing all current URLS (my URLs)
-  const templateVars = { urls: urlDatabase, user_id: req.cookies["user"]};
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  const templateVars = { urls: urlDatabase, user};
   res.render("urls_index", templateVars);
 });
 
@@ -49,7 +53,9 @@ app.post("/urls", (req, res) => { //creates a new url on new url page and redire
 });
 
 app.get("/urls/:shortURL", (req, res) => { //any selected website displaying short url and long url
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: req.cookies["user"]};
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user};
   res.render("urls_show", templateVars);
 });
 
@@ -87,11 +93,16 @@ app.post("/logout", (req, res) => { //logout button with displayed username, pre
 });
 
 app.get("/register", (req, res) => { //register page with two fields for email and password along with submit button
-  const templateVars = { urls: urlDatabase, user_id: req.cookies["user"]}; 
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  const templateVars = { urls: urlDatabase, user}; 
   res.render("urls_registration", templateVars)
 });
 
 app.post("/register", (req, res) => {
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send("Email and password cannot be blank.");
+  }
   const user_id = generateRandomString()
   users[user_id] = {
     id: user_id,
