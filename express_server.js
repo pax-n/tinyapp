@@ -28,13 +28,13 @@ app.listen(PORT, () => {
 
 app.get("/urls/new", (req, res) => { //page for creating a new TinyURL
   const templateVars = {
-    username: req.cookies["username"],
+    user_id: req.cookies["user"],
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls", (req, res) => { //page showing all current URLS (my URLs)
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = { urls: urlDatabase, user_id: req.cookies["user"]};
   res.render("urls_index", templateVars);
 });
 
@@ -49,7 +49,7 @@ app.post("/urls", (req, res) => { //creates a new url on new url page and redire
 });
 
 app.get("/urls/:shortURL", (req, res) => { //any selected website displaying short url and long url
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: req.cookies["user"]};
   res.render("urls_show", templateVars);
 });
 
@@ -82,6 +82,35 @@ app.post("/login", (req, res) => { //login button with input box to display user
 });
 
 app.post("/logout", (req, res) => { //logout button with displayed username, pressing will return back to login button with input
-  res.clearCookie('username');
+  res.clearCookie("user");
   res.redirect(`/urls`);
 });
+
+app.get("/register", (req, res) => { //register page with two fields for email and password along with submit button
+  const templateVars = { urls: urlDatabase, user_id: req.cookies["user"]}; 
+  res.render("urls_registration", templateVars)
+});
+
+app.post("/register", (req, res) => {
+  const user_id = generateRandomString()
+  users[user_id] = {
+    id: user_id,
+    email: req.body.email,
+    password: req.body.password,
+  }
+  res.cookie("user", user_id)
+  res.redirect("/urls");
+});  
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
