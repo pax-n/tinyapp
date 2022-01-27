@@ -21,11 +21,6 @@ const urlDatabase = {
   }
 };
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -39,12 +34,14 @@ const users = {
   }
 }
 
+//generates a six character string containing letters or numbers
 const generateRandomString = function() {
   let newURL = Math.random().toString(36).substr(2,6);
   return newURL;
 };
 
-const getUserByEmail = function(email, database) { //function that loops through the database and checks if the email is present
+//function that loops through the database and checks if a registered email is present
+const getUserByEmail = function(email, database) { 
   for (let userID in database) {
     if (email === database[userID].email) {
       return database[userID];
@@ -59,7 +56,8 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-app.get("/urls", (req, res) => { //page showing all current URLS (my URLs)
+//page showing all current URLS (my URLs)
+app.get("/urls", (req, res) => { 
   const userID = req.cookies["user"]
   const user = users[userID]
   const templateVars = { 
@@ -69,7 +67,8 @@ app.get("/urls", (req, res) => { //page showing all current URLS (my URLs)
   res.render("urls_index", templateVars);
 });
 
-app.get("/urls/new", (req, res) => { //page for creating a new TinyURL
+//page for creating a new TinyURL
+app.get("/urls/new", (req, res) => {
   const userID = req.cookies["user"]
   const user = users[userID]
   const templateVars = {
@@ -86,7 +85,8 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.post("/urls", (req, res) => { //creates a new url on new url page and redirects to new url page
+//creates a new url on new url page and redirects to new url page
+app.post("/urls", (req, res) => { 
   const randomKey = generateRandomString();
   const userID = req.cookies["user"]
   const user = users[userID]
@@ -99,7 +99,8 @@ app.post("/urls", (req, res) => { //creates a new url on new url page and redire
   res.redirect(`/urls/${randomKey}`);
 });
 
-app.get("/urls/:shortURL", (req, res) => { //any selected website displaying short url and long url
+//any selected website displaying short url and long url
+app.get("/urls/:shortURL", (req, res) => { 
   const userID = req.cookies["user"]
   const user = users[userID]
   const templateVars = { 
@@ -110,12 +111,14 @@ app.get("/urls/:shortURL", (req, res) => { //any selected website displaying sho
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => { //clicking a short url will direct you to the website of the long url
+//clicking a short url will direct you to the website of the long url
+app.get("/u/:shortURL", (req, res) => { 
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
- 
-app.post("/urls/:shortURL/delete", (req, res) => { //delete button on my URLs page that will delete selected tiny url
+
+//delete button on my URLs page that will delete selected tiny url
+app.post("/urls/:shortURL/delete", (req, res) => { 
   const userID = req.cookies["user"]
   const user = users[userID]
   if (!user) {
@@ -126,7 +129,8 @@ app.post("/urls/:shortURL/delete", (req, res) => { //delete button on my URLs pa
   }
 });
 
-app.post("/urls/:shortURL/edit", (req, res) => { //edit button on my URLs page that will direct to short url page with ability to edit long url
+//edit button on my URLs page that will direct to short url page with ability to edit long url
+app.post("/urls/:shortURL/edit", (req, res) => { 
   const shortURL = req.params.shortURL;
   const userID = req.cookies["user"]
   const user = users[userID]
@@ -137,7 +141,8 @@ app.post("/urls/:shortURL/edit", (req, res) => { //edit button on my URLs page t
   }
 });
 
-app.post("/urls/:shortURL/update", (req, res) => { //editing the long url on short url page will redirect back to my URLs page with new edit
+//editing the long url on short url page will redirect back to my URLs page with new edit
+app.post("/urls/:shortURL/update", (req, res) => { 
   const shortURL = req.params.shortURL;
   const userID = req.cookies["user"];
   const user = users[userID];
@@ -152,7 +157,8 @@ app.post("/urls/:shortURL/update", (req, res) => { //editing the long url on sho
   };
 });
 
-app.get("/register", (req, res) => { //register page with two fields for email and password along with submit button
+//register page with two fields for email and password along with submit button
+app.get("/register", (req, res) => { 
   const userID = req.cookies["user"]
   const user = users[userID]
   const templateVars = { 
@@ -162,6 +168,7 @@ app.get("/register", (req, res) => { //register page with two fields for email a
   res.render("urls_registration", templateVars)
 });
 
+//registering button will generate new id for entered email and password.
 app.post("/register", (req, res) => {
   const userChecker = getUserByEmail(req.body.email, users);
   if (!req.body.email || !req.body.password) {
@@ -180,6 +187,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });  
 
+//login page with two fields for email and password along with login button.
 app.get("/login", (req, res) => {
   const userID = req.cookies["user"]
   const user = users[userID]
@@ -190,6 +198,7 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars)
 }); 
 
+//login button will log you into an existing account with an email and password.
 app.post("/login", (req, res) => {
   const user = getUserByEmail(req.body.email, users);
   if (user) {
@@ -205,7 +214,8 @@ app.post("/login", (req, res) => {
   }
 });
 
-app.post("/logout", (req, res) => { //logout button with displayed username, pressing will return back to login button with input
+//logout button with displayed username, pressing will return back to login button with input
+app.post("/logout", (req, res) => { 
   res.clearCookie("user");
   res.redirect("/urls");
 });
