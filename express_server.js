@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
-const bodyParser = require("body-parser"); 
+const bodyParser = require("body-parser");
 const { reset } = require("nodemon");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -12,8 +12,6 @@ app.use(cookieSession({
   name: 'session',
   keys: ['76edb64e-dd5c-4e83-ade7-1d7cd9a4bf85', '29cc7359-608b-4d51-a339-eb57d9428869']
 }));
-// const cookieParser = require("cookie-parser");
-// app.use(cookieParser());
 
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
@@ -42,39 +40,8 @@ const users = {
   }
 }
 
-//generates a six character string containing letters or numbers
-const generateRandomString = function() {
-  let newURL = Math.random().toString(36).substr(2,6);
-  return newURL;
-};
+const { generateRandomString, getUserByEmail, authenticateUser } = require('./helpers.js')
 
-//function that loops through the database and checks if a registered email is present
-const getUserByEmail = function(email, database) { 
-  //loops through all the existing userIDs in the database
-  for (let userID in database) {
-    //if entered email exist to email in database, return the matching database
-    if (email === database[userID].email) {
-      return database[userID];
-    }
-  }
-  return undefined;
-}
-
-const authenticateUser = (email, password) => {
-  // retrieve the user with that email
-  const user = getUserByEmail(email, users);
-
-  console.log("FORM PASSWORD:", password, "DB PASSWORD:", user.password);
-
-  // if we got a user back and the passwords match then return the userObj
-  if (user && bcrypt.compareSync(password, user.password)) {
-    // user is authenticated
-    return user;
-  } else {
-    // Otherwise return false
-    return false;
-  }
-};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -234,13 +201,12 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = authenticateUser(email,password);
+  const user = authenticateUser(email, password, users);
 
   //If authenticated, set a cookie with its user id and redirect.
   if (user) {
     const user_id = user.id
       req.session["user"] = user_id 
-      //res.cookie('user', user_id);
       res.redirect(`/urls`);
     } else {
       return res.status(403).send("Wrong password.");
