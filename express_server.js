@@ -10,6 +10,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
+const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
+
 const urlDatabase = {
   b6UTxQ: {
       longURL: "http://www.lighthouselabs.ca",
@@ -42,7 +45,9 @@ const generateRandomString = function() {
 
 //function that loops through the database and checks if a registered email is present
 const getUserByEmail = function(email, database) { 
+  //loops through all the existing userIDs in the database
   for (let userID in database) {
+    //if entered email exist to email in database, return the matching database
     if (email === database[userID].email) {
       return database[userID];
     }
@@ -50,7 +55,21 @@ const getUserByEmail = function(email, database) {
   return undefined;
 }
 
-const randomKey = generateRandomString();
+const authenticateUser = (email, password) => {
+  // retrieve the user with that email
+  const user = getUserByEmail(email, users);
+
+  console.log("FORM PASSWORD:", password, "DB PASSWORD:", user.password);
+
+  // if we got a user back and the passwords match then return the userObj
+  if (user && bcrypt.compareSync(password, user.password)) {
+    // user is authenticated
+    return user;
+  } else {
+    // Otherwise return false
+    return false;
+  }
+};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -74,9 +93,12 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user,
   }
+  //if a user is logged in they can create new url
   if (!userID) {
+    //user redirected to login if not logged in
     res.redirect("/login");
   } else {
+    //redirected to create new url page
     res.render("urls_new", templateVars);
   }
 });
@@ -87,15 +109,18 @@ app.get("/urls.json", (req, res) => {
 
 //creates a new url on new url page and redirects to new url page
 app.post("/urls", (req, res) => { 
+  //generates a six character string
   const randomKey = generateRandomString();
   const userID = req.cookies["user"]
   const user = users[userID]
+  //assigns new random key to entered longURL and user ID
   urlDatabase[randomKey] = {
     longURL: req.body.longURL,
     userID: user.id
   }
   console.log(user);
   console.log(urlDatabase);
+  //redirects to new TinyURL page
   res.redirect(`/urls/${randomKey}`);
 });
 
@@ -168,7 +193,7 @@ app.get("/register", (req, res) => {
   res.render("urls_registration", templateVars)
 });
 
-//registering button will generate new id for entered email and password.
+//register button will generate new id for entered email and password.
 app.post("/register", (req, res) => {
   const userChecker = getUserByEmail(req.body.email, users);
   if (!req.body.email || !req.body.password) {
@@ -181,7 +206,7 @@ app.post("/register", (req, res) => {
   users[user] = {
     id: user,
     email: req.body.email,
-    password: req.body.password,
+    password: bcrypt.hashSync(req.body.password, salt),
   };
   res.cookie("user", user)
   res.redirect("/urls");
@@ -200,18 +225,18 @@ app.get("/login", (req, res) => {
 
 //login button will log you into an existing account with an email and password.
 app.post("/login", (req, res) => {
-  const user = getUserByEmail(req.body.email, users);
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = authenticateUser(email,password);
+
+  //If authenticated, set a cookie with its user id and redirect.
   if (user) {
-    if (user.password === req.body.password) {
-      const user_id = user.id;
-      res.cookie("user", user_id);
-      res.redirect("/urls");
-    } else if (req.body.password !== user.password) {
-      return res.status(403).send("Password does not match.")
+    const user_id = user.id
+      res.cookie('user', user_id);
+      res.redirect(`/urls`);
+    } else {
+      return res.status(403).send("Wrong password.");
     }
-  } else {
-    return res.status(403).send("Email does not exist.")
-  }
 });
 
 //logout button with displayed username, pressing will return back to login button with input
