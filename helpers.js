@@ -8,7 +8,7 @@ const generateRandomString = function() {
 };
 
 //function that loops through the database and checks if a registered email is present
-const getUserByEmail = function(email, database) { 
+const getUserByEmail = function(email, database) {
   //loops through all the existing userIDs in the database
   for (let userID in database) {
     //if entered email exist to email in database, return the matching database
@@ -17,7 +17,7 @@ const getUserByEmail = function(email, database) {
     }
   }
   return undefined;
-}
+};
 
 //function that matches encrypted password with user password
 const authenticateUser = (email, password, users) => {
