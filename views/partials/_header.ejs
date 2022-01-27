@@ -8,23 +8,22 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <% if (!user) { %>
-          <a class="nav-item nav-link" href="/register">Register</a>
-        <% }%>
       </div>
     </div>
     <% if (!user) { %>
-      <form method="POST" class="form-inline" action="/login">
-        <input name="email" placeholder="Email" style="margin-right: 15px; border-radius: 5px;"/>
-        <input name="password" placeholder="password" style="margin-right: 15px; border-radius: 5px;"/>
-        <button type="submit" class="btn btn-outline-dark">Login</button></form>
-        <% }%>
-        <% if (user) { %>
-        <p>
-          <form method="POST" class="form-inline" action="/logout">
-            <b style="font-size: 20px">Hi, <%= user.email %>!</b>
-            <button type="submit" class="btn btn-outline-dark" style="margin-left: 15px">Logout</button></form>
-        </p>
-        <% }%>
+      <div id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/register">Register</a>
+          <a class="nav-item nav-link" href="/login">Login</a>
+        </div>
+      </div>
+    <% }%>
+    <% if (user) { %>
+      <p>
+        <form method="POST" class="form-inline" action="/logout">
+        <b style="font-size: 20px">Hi, <%= user.email %>!</b>
+        <button type="submit" class="btn btn-outline-dark" style="margin-left: 15px">Logout</button></form>
+      </p>
+    <% }%>
   </nav>
 </header>
