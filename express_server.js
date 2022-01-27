@@ -104,11 +104,23 @@ app.post("/urls/:shortURL/update", (req, res) => { //editing the long url on sho
   res.redirect(`/urls`);
 });
 
+app.get("/login", (req, res) => {
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  const templateVars = { urls: urlDatabase, user}; 
+  res.render("urls_login", templateVars)
+}); 
+
 app.post("/login", (req, res) => { //login button with input box to display username
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect(`/urls`);
-});
+  const user_id = generateRandomString()
+  users[user_id] = {
+    id: user_id,
+    email: req.body.email,
+    password: req.body.password,
+  };
+  res.cookie("user", user_id)
+  res.redirect("/urls");
+});  
 
 app.post("/logout", (req, res) => { //logout button with displayed username, pressing will return back to login button with input
   res.clearCookie("user");
@@ -135,7 +147,10 @@ app.post("/register", (req, res) => {
     id: user_id,
     email: req.body.email,
     password: req.body.password,
-  }
+  };
   res.cookie("user", user_id)
   res.redirect("/urls");
 });  
+
+
+
