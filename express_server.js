@@ -11,9 +11,20 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+      longURL: "http://www.lighthouselabs.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
+
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
 const users = { 
   "userRandomID": {
@@ -33,8 +44,7 @@ const generateRandomString = function() {
   return newURL;
 };
 
-//function that loops through the database and checks if the email is present
-const getUserByEmail = function(email, database){
+const getUserByEmail = function(email, database) { //function that loops through the database and checks if the email is present
   for (let userID in database) {
     if (email === database[userID].email) {
       return database[userID];
@@ -49,20 +59,27 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+app.get("/urls", (req, res) => { //page showing all current URLS (my URLs)
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  const templateVars = { 
+    urls: urlDatabase,
+    user,
+  };
+  res.render("urls_index", templateVars);
+});
+
 app.get("/urls/new", (req, res) => { //page for creating a new TinyURL
   const userID = req.cookies["user"]
   const user = users[userID]
   const templateVars = {
     user,
-  };
-  res.render("urls_new", templateVars);
-});
-
-app.get("/urls", (req, res) => { //page showing all current URLS (my URLs)
-  const userID = req.cookies["user"]
-  const user = users[userID]
-  const templateVars = { urls: urlDatabase, user};
-  res.render("urls_index", templateVars);
+  }
+  if (!userID) {
+    res.redirect("/login");
+  } else {
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls.json", (req, res) => { 
@@ -70,87 +87,125 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.post("/urls", (req, res) => { //creates a new url on new url page and redirects to new url page
-  console.log(req.body);  // Log the POST request body to the console
+  const randomKey = generateRandomString();
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  urlDatabase[randomKey] = {
+    longURL: req.body.longURL,
+    userID: user.id
+  }
+  console.log(user);
+  console.log(urlDatabase);
   res.redirect(`/urls/${randomKey}`);
-  urlDatabase[randomKey] = req.body.longURL;         // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls/:shortURL", (req, res) => { //any selected website displaying short url and long url
   const userID = req.cookies["user"]
   const user = users[userID]
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user};
+  const templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL].longURL, 
+    user
+  };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => { //clicking a short url will direct you to the website of the long url
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
  
 app.post("/urls/:shortURL/delete", (req, res) => { //delete button on my URLs page that will delete selected tiny url
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  if (!user) {
+    return res.status(403).send("You do not have permission to do this.")
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  }
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => { //edit button on my URLs page that will direct to short url page with ability to edit long url
   const shortURL = req.params.shortURL;
-  res.redirect(`/urls/${shortURL}`);
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  if (!user) {
+    return res.status(403).send("You do not have permission to do this.")
+  } else {
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
 app.post("/urls/:shortURL/update", (req, res) => { //editing the long url on short url page will redirect back to my URLs page with new edit
-  const newURL = req.body.longURL;
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = newURL;
-  res.redirect(`/urls`);
-});
-
-app.get("/login", (req, res) => {
-  const userID = req.cookies["user"]
-  const user = users[userID]
-  const templateVars = { urls: urlDatabase, user}; 
-  res.render("urls_login", templateVars)
-}); 
-
-app.post("/login", (req, res) => { //login button with input box to display username
-  const user_id = generateRandomString()
-  users[user_id] = {
-    id: user_id,
-    email: req.body.email,
-    password: req.body.password,
+  const userID = req.cookies["user"];
+  const user = users[userID];
+  if (!user) {
+    return res.status(403).send("You do not have permission to do this.")
+  } else {
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: user.id
+    }
+    res.redirect(`/urls`);
   };
-  res.cookie("user", user_id)
-  res.redirect("/urls");
-});  
-
-app.post("/logout", (req, res) => { //logout button with displayed username, pressing will return back to login button with input
-  res.clearCookie("user");
-  res.redirect(`/urls`);
 });
 
 app.get("/register", (req, res) => { //register page with two fields for email and password along with submit button
   const userID = req.cookies["user"]
   const user = users[userID]
-  const templateVars = { urls: urlDatabase, user}; 
+  const templateVars = { 
+    urls: urlDatabase, 
+    user
+  }; 
   res.render("urls_registration", templateVars)
 });
 
 app.post("/register", (req, res) => {
   const userChecker = getUserByEmail(req.body.email, users);
   if (!req.body.email || !req.body.password) {
-    return res.status(400).send("Email and password cannot be blank.");
+    return res.status(400).send("Email or password cannot be blank.");
   } else if (userChecker) {
     return res.status(400).send("Email is already in use.");
   }
 
-  const user_id = generateRandomString()
-  users[user_id] = {
-    id: user_id,
+  const user = generateRandomString()
+  users[user] = {
+    id: user,
     email: req.body.email,
     password: req.body.password,
   };
-  res.cookie("user", user_id)
+  res.cookie("user", user)
   res.redirect("/urls");
 });  
 
+app.get("/login", (req, res) => {
+  const userID = req.cookies["user"]
+  const user = users[userID]
+  const templateVars = { 
+    urls: urlDatabase, 
+    user
+  }; 
+  res.render("urls_login", templateVars)
+}); 
 
+app.post("/login", (req, res) => {
+  const user = getUserByEmail(req.body.email, users);
+  if (user) {
+    if (user.password === req.body.password) {
+      const user_id = user.id;
+      res.cookie("user", user_id);
+      res.redirect("/urls");
+    } else if (req.body.password !== user.password) {
+      return res.status(403).send("Password does not match.")
+    }
+  } else {
+    return res.status(403).send("Email does not exist.")
+  }
+});
 
+app.post("/logout", (req, res) => { //logout button with displayed username, pressing will return back to login button with input
+  res.clearCookie("user");
+  res.redirect("/urls");
+});
