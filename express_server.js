@@ -7,8 +7,13 @@ const bodyParser = require("body-parser");
 const { reset } = require("nodemon");
 app.use(bodyParser.urlencoded({extended: true}));
 
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
+const cookieSession = require('cookie-session')
+app.use(cookieSession({
+  name: 'session',
+  keys: ['76edb64e-dd5c-4e83-ade7-1d7cd9a4bf85', '29cc7359-608b-4d51-a339-eb57d9428869']
+}));
+// const cookieParser = require("cookie-parser");
+// app.use(cookieParser());
 
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
@@ -77,7 +82,7 @@ app.listen(PORT, () => {
 
 //page showing all current URLS (my URLs)
 app.get("/urls", (req, res) => { 
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
   const user = users[userID]
   const templateVars = { 
     urls: urlDatabase,
@@ -88,7 +93,7 @@ app.get("/urls", (req, res) => {
 
 //page for creating a new TinyURL
 app.get("/urls/new", (req, res) => {
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
   const user = users[userID]
   const templateVars = {
     user,
@@ -111,7 +116,7 @@ app.get("/urls.json", (req, res) => {
 app.post("/urls", (req, res) => { 
   //generates a six character string
   const randomKey = generateRandomString();
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
   const user = users[userID]
   //assigns new random key to entered longURL and user ID
   urlDatabase[randomKey] = {
@@ -126,7 +131,8 @@ app.post("/urls", (req, res) => {
 
 //any selected website displaying short url and long url
 app.get("/urls/:shortURL", (req, res) => { 
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
+  //const userID = req.cookies["user"]
   const user = users[userID]
   const templateVars = { 
     shortURL: req.params.shortURL, 
@@ -144,7 +150,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //delete button on my URLs page that will delete selected tiny url
 app.post("/urls/:shortURL/delete", (req, res) => { 
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
   const user = users[userID]
   if (!user) {
     return res.status(403).send("You do not have permission to do this.")
@@ -157,7 +163,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //edit button on my URLs page that will direct to short url page with ability to edit long url
 app.post("/urls/:shortURL/edit", (req, res) => { 
   const shortURL = req.params.shortURL;
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
   const user = users[userID]
   if (!user) {
     return res.status(403).send("You do not have permission to do this.")
@@ -169,7 +175,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 //editing the long url on short url page will redirect back to my URLs page with new edit
 app.post("/urls/:shortURL/update", (req, res) => { 
   const shortURL = req.params.shortURL;
-  const userID = req.cookies["user"];
+  const userID = req.session["user"];
   const user = users[userID];
   if (!user) {
     return res.status(403).send("You do not have permission to do this.")
@@ -184,7 +190,7 @@ app.post("/urls/:shortURL/update", (req, res) => {
 
 //register page with two fields for email and password along with submit button
 app.get("/register", (req, res) => { 
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
   const user = users[userID]
   const templateVars = { 
     urls: urlDatabase, 
@@ -208,13 +214,14 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, salt),
   };
-  res.cookie("user", user)
+  req.session["user"] = user;
+  //res.cookie("user", user)
   res.redirect("/urls");
 });  
 
 //login page with two fields for email and password along with login button.
 app.get("/login", (req, res) => {
-  const userID = req.cookies["user"]
+  const userID = req.session["user"]
   const user = users[userID]
   const templateVars = { 
     urls: urlDatabase, 
@@ -232,7 +239,8 @@ app.post("/login", (req, res) => {
   //If authenticated, set a cookie with its user id and redirect.
   if (user) {
     const user_id = user.id
-      res.cookie('user', user_id);
+      req.session["user"] = user_id 
+      //res.cookie('user', user_id);
       res.redirect(`/urls`);
     } else {
       return res.status(403).send("Wrong password.");
@@ -241,6 +249,6 @@ app.post("/login", (req, res) => {
 
 //logout button with displayed username, pressing will return back to login button with input
 app.post("/logout", (req, res) => { 
-  res.clearCookie("user");
+  req.session["user"] = null;
   res.redirect("/urls");
 });
