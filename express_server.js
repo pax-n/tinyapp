@@ -46,12 +46,12 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user,
   };
-  //if a user is logged in they can create new url
-  if (!userID) {
+  //checking if a user is logged in
+  if (!user) {
     //user redirected to login if not logged in
     res.redirect("/login");
   } else {
-    //redirected to create new url page
+    //redirected to create new url page 
     res.render("urls_new", templateVars);
   }
 });

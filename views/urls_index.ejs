@@ -12,7 +12,9 @@
   <%- include('partials/_header.ejs') %>
   <main style="margin: 1em;">
     <% if (!user) { %>
-      <h2> Please <a href="/login">login</a> first!</h2>
+      <div class="alert alert-warning alert-dismissible fade show announcement-top-bar" role="alert">
+        <h3 class="d-none d-md-block"> Please <a href="/login">login</a> first! If you have not registered, please register <a href="/register">here.</a></h3>
+      </div>
     <% } else if (user) {%>
     <h3>My URLs</h3>
     <table class="table">

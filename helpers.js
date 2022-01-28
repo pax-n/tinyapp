@@ -23,7 +23,6 @@ const getUserByEmail = function(email, database) {
 const authenticateUser = (email, password, users) => {
   // retrieve the user with that email
   const user = getUserByEmail(email, users);
-  console.log("FORM PASSWORD:", password, "DB PASSWORD:", user.password);
   // if we got a user back and the passwords match then return the userObj
   if (user && bcrypt.compareSync(password, user.password)) {
     // user is authenticated
