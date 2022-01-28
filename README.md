@@ -8,13 +8,13 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Screenshot of URLs page"](https://github.com/pax-n/docs/urls-page.png)
+!["Screenshot of URLs page"](https://github.com/pax-n/tinyapp/blob/master/docs/urls-page.png)
 
-!["Screenshot of new URLs"](https://github.com/pax-n/docs/urls-new.png)
+!["Screenshot of new URLs"](https://github.com/pax-n/tinyapp/blob/master/docs/urls-new.png)
 
-!["Screenshot of register page"](https://github.com/pax-n/docs/urls-registration.png)
+!["Screenshot of register page"](https://github.com/pax-n/tinyapp/blob/master/docs/urls-registration.png)
 
-!["Screenshot of warning header"](https://github.com/pax-n/docs/urls-warning.png)
+!["Screenshot of warning header"](https://github.com/pax-n/tinyapp/blob/master/docs/urls-warning.png)
 
 
 ## Dependencies
