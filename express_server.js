@@ -155,7 +155,12 @@ app.get("/register", (req, res) => {
     urls: urlDatabase,
     user
   };
-  res.render("urls_registration", templateVars);
+  if (!user) {
+    res.render("urls_registration", templateVars);
+  } else {
+    res.redirect("/urls")
+  }
+  
 });
 
 //register button will generate new id for entered email and password.
@@ -189,7 +194,11 @@ app.get("/login", (req, res) => {
     urls: urlDatabase,
     user
   };
-  res.render("urls_login", templateVars);
+  if (!user) {
+    res.render("urls_login", templateVars);
+  } else {
+    res.redirect("/urls")
+  }
 });
 
 //login button will log you into an existing account with an email and password.
