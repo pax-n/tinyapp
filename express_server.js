@@ -20,10 +20,6 @@ const salt = bcrypt.genSaltSync(10);
 const urlDatabase = {};
 const users = {};
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -69,8 +65,14 @@ app.post("/urls", (req, res) => {
   };
   console.log(user);
   console.log(urlDatabase);
-  //redirects to new TinyURL page
-  res.redirect(`/urls/${randomKey}`);
+  //if user is logged in
+  if (!user) {
+    //user redirected to login if not logged in
+    res.redirect("/login");
+  } else {
+    //redirected to their new url page
+    res.redirect(`/urls/${randomKey}`);
+  }
 });
 
 //New tinyURL page for any newly created urls
@@ -155,9 +157,12 @@ app.get("/register", (req, res) => {
     urls: urlDatabase,
     user
   };
+  //if user is logged in
   if (!user) {
+    //if user is not logged in, shows registration page
     res.render("urls_registration", templateVars);
   } else {
+    //if user is already logged in, redirects to url page
     res.redirect("/urls")
   }
   
@@ -194,9 +199,12 @@ app.get("/login", (req, res) => {
     urls: urlDatabase,
     user
   };
+  //if user is logged in
   if (!user) {
+    //if user is not logged in, shows login page
     res.render("urls_login", templateVars);
   } else {
+    //if user is already logged in, redirects to url page
     res.redirect("/urls")
   }
 });
@@ -221,4 +229,8 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session["user"] = null;
   res.redirect("/urls");
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
