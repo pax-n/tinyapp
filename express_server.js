@@ -24,6 +24,11 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//redirects to url index page
+app.get("/", (req, res) => {
+  res.redirect("/urls")
+});
+
 //page showing all current URLS (my URLs)
 app.get("/urls", (req, res) => {
   const userID = req.session["user"];
