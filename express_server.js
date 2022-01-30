@@ -26,7 +26,7 @@ app.get("/urls.json", (req, res) => {
 
 //redirects to url index page
 app.get("/", (req, res) => {
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 //page showing all current URLS (my URLs)
@@ -52,7 +52,7 @@ app.get("/urls/new", (req, res) => {
     //user redirected to login if not logged in
     res.redirect("/login");
   } else {
-    //redirected to create new url page 
+    //redirected to create new url page
     res.render("urls_new", templateVars);
   }
 });
@@ -168,7 +168,7 @@ app.get("/register", (req, res) => {
     res.render("urls_registration", templateVars);
   } else {
     //if user is already logged in, redirects to url page
-    res.redirect("/urls")
+    res.redirect("/urls");
   }
   
 });
@@ -210,7 +210,7 @@ app.get("/login", (req, res) => {
     res.render("urls_login", templateVars);
   } else {
     //if user is already logged in, redirects to url page
-    res.redirect("/urls")
+    res.redirect("/urls");
   }
 });
 
@@ -232,7 +232,7 @@ app.post("/login", (req, res) => {
 
 //logout button with displayed username, pressing will return back to login button with input
 app.post("/logout", (req, res) => {
-  req.session["user"] = null;
+  req.session = null;
   res.redirect("/urls");
 });
 
